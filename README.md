@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/51e041f9-f095-4def-bef9-f5f999fc7fd3
-
 # 🚖 Cab Management System
 
 A full-stack cab booking and management web application that lets users book cabs, and lets admins manage drivers, bookings, and payments — built as a DBMS lab project and evolved into a complete Next.js application.
