@@ -41,6 +41,20 @@ The Cab Management System started as a PHP/MySQL microproject for the DBMS Lab c
 
 ---
 
+## 🎥 Demo
+
+### Admin Login
+https://github.com/user-attachments/assets/2ce9a33e-69d5-4c8c-a9ad-fb3236bfca6e
+
+
+### User Login & Booking
+*(video here)*
+
+### Driver Login
+*(video here)*
+
+---
+
 ## 🚀 Getting Started (Run Locally)
 
 ### 1. Clone the repository
@@ -72,14 +86,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots of the homepage, booking flow, and admin dashboard here)*
-
----
-
 ## 👩‍💻 Author
 
 **Jareena Banu S**
 B.Tech CSE Student, Rajiv Gandhi Institute of Technology (RIT Kottayam), KTU
 [LinkedIn](https://linkedin.com/in/jareena-banu-s) · [GitHub](https://github.com/jareenabanu)
+
+
