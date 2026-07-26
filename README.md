@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚖 Cab Management System
 
-## Getting Started
+A full-stack cab booking and management web application that lets users book cabs, and lets admins manage drivers, bookings, and payments — built as a DBMS lab project and evolved into a complete Next.js application.
 
-First, run the development server:
+**Live Demo:** [cab-management-eight.vercel.app](https://cab-management-eight.vercel.app)
+---
 
+## 📌 About the Project
+
+The Cab Management System started as a PHP/MySQL microproject for the DBMS Lab course (PCCSL408) and was later rebuilt as a modern full-stack web application using Next.js. It handles the core workflow of a cab booking platform — from user bookings to driver assignment to payment tracking — with a dedicated admin panel for oversight.
+
+---
+
+## ✨ Features
+
+- 🔐 **Admin Login** — secure authentication for administrators
+- 🚕 **Cab & Driver Management** — add, view, and manage cabs and driver details
+- 📅 **Booking System** — users can book cabs; bookings are tracked in the database
+- 💳 **Payment Tracking** — payment records managed via MongoDB Atlas
+- 📊 **Relational Data Handling** — structured relational schema (users, drivers, cabs, bookings) built with SQL joins across tables
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend & Backend | [Next.js](https://nextjs.org/) (React) |
+| Relational Database | MySQL |
+| NoSQL Database | MongoDB Atlas |
+| Deployment | Vercel |
+
+---
+
+## 🗂️ Project Origins
+
+- Originally built as a **DBMS Lab microproject (PCCSL408)** — Group 6
+- Team members: **Jareena Banu S**, Anand V R, Nihal T P
+- Includes a full **ER diagram** covering entities: `users`, `drivers`, `cabs`, `bookings`, with primary keys `user_id`, `driver_id`, `cab_id`, and `booking_id`
+
+---
+
+## 🎥 Demo
+
+### Admin Login
+https://github.com/user-attachments/assets/2ce9a33e-69d5-4c8c-a9ad-fb3236bfca6e
+
+
+### User Login & Booking
+https://github.com/user-attachments/assets/70c8a9ba-f35d-4f41-8a5d-73fefa0c446c
+
+### Driver Login
+https://github.com/user-attachments/assets/6353a25e-4cdb-4ebd-8947-4ab7a17e41ea
+
+### Payment
+https://github.com/user-attachments/assets/0f3cf989-a25e-49a3-8423-d5ef9e13705e
+
+
+---
+
+## 🚀 Getting Started (Run Locally)
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/jareenabanu/cab_management.git
+cd cab_management
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 3. Set up environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file in the project root with the following:
 
-## Learn More
+```env
+DATABASE_URL=mysql://root:your_mysql_password@127.0.0.1:3306/cab_management
+MONGODB_URI=your_mongodb_atlas_connection_string
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Run the development server
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the app running.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 👩‍💻 Author
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Jareena Banu S**
+B.Tech CSE Student, Rajiv Gandhi Institute of Technology (RIT Kottayam), KTU
+[LinkedIn](https://linkedin.com/in/jareena-banu-s) · [GitHub](https://github.com/jareenabanu)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
