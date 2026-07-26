@@ -2,8 +2,7 @@
 
 A full-stack cab booking and management web application that lets users book cabs, and lets admins manage drivers, bookings, and payments — built as a DBMS lab project and evolved into a complete Next.js application.
 
-**Live Demo:** [cab-management-two.vercel.app](https://cab-management-two.vercel.app)
-
+**Live Demo:** [cab-management-eight.vercel.app](https://cab-management-eight.vercel.app)
 ---
 
 ## 📌 About the Project
