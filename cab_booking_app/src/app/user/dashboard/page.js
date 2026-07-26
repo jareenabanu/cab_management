@@ -32,7 +32,7 @@ export default async function UserDashboard({ searchParams }) {
 
   const bookingsRaw = await query(
     `SELECT b.booking_id, b.booking_date, b.booking_time, b.pickup_location, b.drop_location, b.status,
-            b.distance_km, b.fare_amount, b.payment_status, b.created_at, b.updated_at,
+            b.distance_km, b.fare_amount, b.payment_status, b.created_at, b.updated_at, b.driver_id,
             c.cab_number, c.cab_type, d.name as driver_name, d.phone as driver_phone
      FROM booking b
      LEFT JOIN cabs c ON b.cab_id = c.cab_id
@@ -66,6 +66,13 @@ export default async function UserDashboard({ searchParams }) {
     : [];
 
   const paymentMap = new Map(payments.map((p) => [p.booking_id, p.status]));
+  const reviews = bookingIds.length
+    ? await (await getDb())
+        .collection("driver_reviews")
+        .find({ user_id: Number(userId), booking_id: { $in: bookingIds } })
+        .toArray()
+    : [];
+  const reviewMap = new Map(reviews.map((r) => [r.booking_id, r]));
   const statusClass = (status) =>
     status === "Paid" ? "chip chip-paid" : "chip";
 
@@ -92,6 +99,10 @@ export default async function UserDashboard({ searchParams }) {
             <p className="portal-meta">{bookings.length} trips in your account</p>
             {params?.booked && <p className="pill">Booking created successfully.</p>}
             {params?.cancelled && <p className="pill">Booking cancelled.</p>}
+            {params?.review_saved && <p className="pill">Review saved. Thanks for your feedback!</p>}
+            {params?.error === "review_unpaid" && <p className="pill">Payment must be completed before reviewing.</p>}
+            {params?.error === "review_invalid" && <p className="pill">Please provide a rating between 1 and 5.</p>}
+            {params?.error === "review_notfound" && <p className="pill">Booking not found for review.</p>}
             {latestUpdate && (
               <p className="pill">
                 Latest update: Booking #{latestUpdate.booking_id} is {latestUpdate.status}
@@ -100,6 +111,7 @@ export default async function UserDashboard({ searchParams }) {
             )}
           </div>
         </div>
+
       </section>
 
       <h2 className="section-title">Your bookings</h2>
@@ -112,7 +124,7 @@ export default async function UserDashboard({ searchParams }) {
               <thead>
                 <tr>
                   <th>Booking ID</th>
-                  <th>Date</th>
+                  <th>Date & Time</th>
                   <th>Pickup</th>
                   <th>Drop</th>
                   <th>Cab</th>
@@ -122,6 +134,7 @@ export default async function UserDashboard({ searchParams }) {
                   <th>Status</th>
                   <th>Payment</th>
                   <th>Action</th>
+                  <th>Review</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,6 +146,8 @@ export default async function UserDashboard({ searchParams }) {
                     booking.status === "Dropped" &&
                     (booking.distance_km || booking.fare_amount) &&
                     !isPaid;
+                  const review = reviewMap.get(booking.booking_id);
+                  const canReview = isPaid && booking.driver_id;
                   
                   let stateColor = 'var(--ink)';
                   let stateBg = '#f0f0f0';
@@ -143,7 +158,7 @@ export default async function UserDashboard({ searchParams }) {
                   return (
                   <tr key={booking.booking_id}>
                     <td>#{booking.booking_id}</td>
-                    <td>{booking.booking_date}</td>
+                    <td>{booking.booking_date} {booking.booking_time && `at ${booking.booking_time.slice(0,5)}`}</td>
                     <td>{booking.pickup_location}</td>
                     <td>{booking.drop_location}</td>
                     <td>{booking.cab_number} ({booking.cab_type})</td>
@@ -169,6 +184,19 @@ export default async function UserDashboard({ searchParams }) {
                         )}
                       </div>
                     </td>
+                    <td>
+                      {canReview ? (
+                        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                          <a className="btn secondary" href={`/user/review/${booking.booking_id}`}>
+                            {review ? "Edit Review" : "Review"}
+                          </a>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#888' }}>
+                          {isPaid ? "Driver not assigned" : "Available after payment"}
+                        </span>
+                      )}
+                    </td>
                   </tr>
                   );
                 })}
@@ -177,6 +205,7 @@ export default async function UserDashboard({ searchParams }) {
           )}
         </div>
       </section>
+
     </main>
   );
 }

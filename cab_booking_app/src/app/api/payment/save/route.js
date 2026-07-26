@@ -71,5 +71,5 @@ export async function POST(request) {
 
   revalidatePath("/user/dashboard");
   revalidatePath(`/user/payment/${bookingId}`);
-  return NextResponse.redirect(new URL("/user/dashboard?payment_success=1", request.url));
+  return NextResponse.redirect(new URL(`/user/review/${bookingId}`, request.url));
 }

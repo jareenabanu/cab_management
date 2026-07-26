@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { cookies } from "next/headers";
 import { query } from "@/lib/mysql";
 import { getDb } from "@/lib/db";
@@ -50,7 +51,7 @@ export default async function AdminDashboard() {
     ),
     query("SELECT * FROM view_driver_earnings"),
     query("SELECT user_id, name, email FROM users ORDER BY user_id DESC"),
-    query("SELECT driver_id, name, email, phone, password, status FROM drivers ORDER BY driver_id DESC"),
+    query("SELECT driver_id, name, email, phone, password, status, driver_status FROM drivers ORDER BY driver_id DESC"),
     query(
       `SELECT b.booking_id, b.booking_date, b.booking_time, b.pickup_location, b.drop_location, b.status,
               b.user_id, b.driver_id, b.payment_status, b.distance_km, b.fare_amount,
@@ -64,6 +65,15 @@ export default async function AdminDashboard() {
   ]);
 
   const payments = await getDb().then(db => db.collection("payments").find().toArray()).catch(() => []);
+  const reviews = await getDb()
+    .then(db => db.collection("driver_reviews").find().toArray())
+    .catch(() => []);
+  reviews.sort((a, b) => {
+    const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+    const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+    return bTime - aTime;
+  });
+  const limitedReviews = reviews.slice(0, 30);
   const pendingCountRows = await query("SELECT COUNT(*) as count FROM drivers WHERE status = 'Pending'");
   const pendingEditsCountRows = await query("SELECT COUNT(*) as count FROM driver_edit_requests WHERE status = 'Pending'");
   
@@ -92,6 +102,7 @@ export default async function AdminDashboard() {
   });
 
   const userMap = new Map(users.map((u) => [u.user_id, u]));
+  const driverMap = new Map(drivers.map((d) => [d.driver_id, d]));
   const paymentsByBooking = new Map(activePayments.map((p) => [p.booking_id, p]));
 
   const driverStats = new Map();
@@ -103,7 +114,7 @@ export default async function AdminDashboard() {
     driverStats.set(driver.driver_id, {
       driver,
       totalBookings: earnings?.total_trips || 0,
-      onDuty: false,
+      onDuty: driver.driver_status === 'On Duty',
       inRide: false,
       collected: Number(earnings?.total_earned || 0),
       paidCount: 0,
@@ -118,9 +129,6 @@ export default async function AdminDashboard() {
     const status = booking.status;
     if (status === "Picked") {
       stats.inRide = true;
-      stats.onDuty = true;
-    } else if (status === "Confirmed") {
-      stats.onDuty = true;
     }
 
     const payment = paymentsByBooking.get(booking.booking_id);
@@ -198,6 +206,12 @@ export default async function AdminDashboard() {
       lastBooking: formatDate(userBookings[0]?.booking_date || "-"),
     };
   });
+
+  const reviewsWithPeople = limitedReviews.map((review) => ({
+    ...review,
+    driver_name: driverMap.get(review.driver_id)?.name || "Driver",
+    user_name: userMap.get(review.user_id)?.name || "User",
+  }));
 
   return (
     <main>
@@ -286,6 +300,7 @@ export default async function AdminDashboard() {
               <thead>
                 <tr>
                   <th>Booking</th>
+                  <th>Date & Time</th>
                   <th>User</th>
                   <th>Phone</th>
                   <th>Driver</th>
@@ -302,6 +317,7 @@ export default async function AdminDashboard() {
                   return (
                     <tr key={`trip-${booking.booking_id}`}>
                       <td>#{booking.booking_id}</td>
+                      <td>{new Date(booking.booking_date || 0).toISOString().slice(0, 10)} {booking.booking_time ? `at ${String(booking.booking_time).slice(0, 5)}` : ""}</td>
                       <td>{booking.user_name}</td>
                       <td>{booking.user_phone || "-"}</td>
                       <td>{booking.driver_name}</td>
@@ -399,6 +415,44 @@ export default async function AdminDashboard() {
                     <td>INR {payment.amount.toFixed(2)}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+
+      <h2 className="section-title">Driver reviews</h2>
+      <section className="portal-grid">
+        <div className="portal-card" style={{ gridColumn: "1 / -1" }}>
+          {reviewsWithPeople.length === 0 ? (
+            <p className="portal-meta">No reviews submitted yet.</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Booking</th>
+                  <th>Driver</th>
+                  <th>User</th>
+                  <th>Rating</th>
+                  <th>Feedback</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviewsWithPeople.map((review) => {
+                  const reviewDate = review.updated_at || review.created_at;
+                  const displayDate = reviewDate ? new Date(reviewDate).toISOString().slice(0, 10) : "-";
+                  return (
+                    <tr key={`review-${review.booking_id}`}>
+                      <td>#{review.booking_id}</td>
+                      <td>{review.driver_name}</td>
+                      <td>{review.user_name}</td>
+                      <td>{review.rating || "-"}</td>
+                      <td>{review.feedback || "-"}</td>
+                      <td>{displayDate}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise";
 
-const connectionString = process.env.DATABASE_URL || "mysql://root:@127.0.0.1:3306/cab_management";
+const connectionString = process.env.DATABASE_URL || "mysql://root:jareena@2004@127.0.0.1:3306/cab_management";
 
 let pool;
 

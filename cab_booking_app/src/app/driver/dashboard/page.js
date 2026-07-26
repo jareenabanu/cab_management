@@ -54,6 +54,20 @@ export default async function DriverDashboard({ searchParams }) {
         .toArray()
     : [];
   const paymentMap = new Map(payments.map((p) => [p.booking_id, p.status]));
+  const reviews = await (await getDb())
+    .collection("driver_reviews")
+    .find({ driver_id: Number(driverId) })
+    .toArray();
+  reviews.sort((a, b) => {
+    const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+    const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+    return bTime - aTime;
+  });
+  const reviewTotal = reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0);
+  const reviewAverage = reviews.length ? (reviewTotal / reviews.length).toFixed(1) : "0.0";
+  const userNameByBooking = new Map(
+    bookings.map((booking) => [booking.booking_id, booking.user_name || "User"])
+  );
 
   return (
     <main>
@@ -116,6 +130,7 @@ export default async function DriverDashboard({ searchParams }) {
                   <th>Booking</th>
                   <th>User</th>
                   <th>Phone</th>
+                  <th>Date & Time</th>
                   <th>Route</th>
                   <th>Action</th>
                 </tr>
@@ -126,6 +141,7 @@ export default async function DriverDashboard({ searchParams }) {
                     <td>#{booking.booking_id}</td>
                     <td>{booking.user_name || "User"}</td>
                     <td>{booking.user_phone || "-"}</td>
+                    <td>{new Date(booking.booking_date || 0).toISOString().slice(0, 10)} {booking.booking_time ? `at ${String(booking.booking_time).slice(0, 5)}` : ""}</td>
                     <td>{booking.pickup_location} {"->"} {booking.drop_location}</td>
                     <td style={{ display: "flex", gap: 8 }}>
                       <form action="/api/driver/accept" method="POST">
@@ -158,6 +174,7 @@ export default async function DriverDashboard({ searchParams }) {
                   <th>Booking</th>
                   <th>User</th>
                   <th>Phone</th>
+                  <th>Date & Time</th>
                   <th>Route</th>
                   <th>Status</th>
                   <th>Distance (km)</th>
@@ -177,6 +194,7 @@ export default async function DriverDashboard({ searchParams }) {
                     <td>#{booking.booking_id}</td>
                     <td>{booking.user_name || "User"}</td>
                     <td>{booking.user_phone || booking.user_phone_master || "-"}</td>
+                    <td>{new Date(booking.booking_date || 0).toISOString().slice(0, 10)} {booking.booking_time ? `at ${String(booking.booking_time).slice(0, 5)}` : ""}</td>
                     <td>{booking.pickup_location} {"->"} {booking.drop_location}</td>
                     <td><span className="chip" style={{color: stateColor, backgroundColor: stateBg}}>{booking.status}</span></td>
                     <td>{booking.distance_km ? `${booking.distance_km} km` : "-"}</td>
@@ -207,6 +225,43 @@ export default async function DriverDashboard({ searchParams }) {
                     </td>
                   </tr>
                 )})}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+
+      <h2 className="section-title">Driver reviews</h2>
+      <section className="portal-grid">
+        <div className="portal-card" style={{ gridColumn: "1 / -1" }}>
+          <p className="portal-meta">Average rating: {reviewAverage} / 5 ({reviews.length} review{reviews.length === 1 ? "" : "s"})</p>
+          {reviews.length === 0 ? (
+            <p className="portal-meta">No reviews yet.</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Booking</th>
+                  <th>User</th>
+                  <th>Rating</th>
+                  <th>Feedback</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map((review) => {
+                  const reviewDate = review.updated_at || review.created_at;
+                  const displayDate = reviewDate ? new Date(reviewDate).toISOString().slice(0, 10) : "-";
+                  return (
+                    <tr key={`review-${review.booking_id}`}>
+                      <td>#{review.booking_id}</td>
+                      <td>{userNameByBooking.get(review.booking_id) || "User"}</td>
+                      <td>{review.rating || "-"}</td>
+                      <td>{review.feedback || "-"}</td>
+                      <td>{displayDate}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
